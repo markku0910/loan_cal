@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>貸好運V1.0 - 車貸試算</title>
+    <link rel="apple-touch-icon" href="icon.jpg">
+    <link rel="icon" sizes="192x192" href="icon.jpg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #f0f0f0;
+            --gold-primary: #D4AF37; /* 經典香檳金 */
+            --gold-hover: #F3E5AB;
+            --input-bg: #2a2a2a;
+            --border-color: #444;
+            --error-color: #ff5252;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "微軟正黑體", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--gold-primary);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
+            padding: 30px 25px;
+            width: 100%;
+            max-width: 420px;
+            box-sizing: border-box;
+        }
+
+        /* 標題區塊佈局 */
+        .title-container {
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            padding-top: 10px;
+        }
+
+        .main-title {
+            font-family: 'Noto Serif TC', 'Kaiti TC', 'BiauKai', serif;
+            font-size: 46px;
+            color: var(--gold-primary);
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.6);
+            position: relative;
+            display: inline-block;
+            line-height: 1;
+        }
+
+        .version {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 32px;
+            font-style: italic;
+            font-weight: 300;
+            margin-left: 8px;
+            color: var(--gold-hover);
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            position: absolute;
+            bottom: 4px;
+            right: -75px;
+            font-family: "Helvetica Neue", "PingFang TC", "微軟正黑體", sans-serif;
+            font-size: 13px;
+            color: #aaa;
+            letter-spacing: 2px;
+            text-shadow: none;
+            white-space: nowrap;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #ccc;
+            letter-spacing: 1px;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--gold-primary);
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background-color: var(--input-bg);
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            accent-color: var(--gold-primary);
+        }
+
+        #rateDisplay {
+            color: var(--gold-primary);
+            font-weight: bold;
+            min-width: 45px;
+            text-align: right;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .checkbox-group input {
+            margin-right: 8px;
+            accent-color: var(--gold-primary);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%);
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:hover {
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            border: 1px solid var(--gold-primary);
+            display: none;
+        }
+
+        .result-item {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 8px;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .result-label {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .result-value {
+            font-weight: bold;
+            color: var(--gold-primary);
+            font-size: 18px;
+        }
+
+        .disabled-area {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        
+        .hint-text {
+            font-size: 13px;
+            color: var(--gold-primary);
+            margin-left: 5px;
+            font-weight: normal;
+        }
+
+        /* 新增：試算結果僅供參考的淺灰小字 */
+        .reference-note {
+            font-size: 12px;
+            color: #777; /* 淺灰色 */
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px solid #333;
+        }
+
+        /* 新增：聯絡資訊與 IG 連結區塊 */
+        .contact-footer {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .contact-text {
+            color: #ccc;
+            font-size: 14px;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .ig-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--gold-primary);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: color 0.3s, transform 0.2s;
+        }
+
+        .ig-link:hover {
+            color: var(--gold-hover);
+            transform: scale(1.05);
+        }
+
+        /* IG SVG 圖示設定 */
+        .ig-icon {
+            width: 22px;
+            height: 22px;
+            fill: currentColor; /* 讓圖標顏色跟隨字體變成金色 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="title-container">
+        <div class="main-title">
+            貸好運<span class="version">V1.0</span>
+            <span class="subtitle">車貸試算</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="loanAmount">貸款金額 (元)</label>
+        <input type="number" id="loanAmount" placeholder="請輸入總貸款金額，如：500000">
+    </div>
+
+    <div class="form-group">
+        <label>貸款年利率 (%)</label>
+        <div class="range-container" id="rateInputArea">
+            <input type="range" id="interestRate" min="1" max="15" step="0.1" value="5">
+            <span id="rateDisplay">5.0%</span>
+        </div>
+        <label class="checkbox-group">
+            <input type="checkbox" id="unknownRate"> 我不知道利率 (將由系統為您推估)
+        </label>
+    </div>
+
+    <div class="form-group">
+        <label for="loanTerms">貸款期數 (月)</label>
+        <select id="loanTerms">
+            <option value="12">12 期 (1年)</option>
+            <option value="24">24 期 (2年)</option>
+            <option value="36">36 期 (3年)</option>
+            <option value="48">48 期 (4年)</option>
+            <option value="60" selected>60 期 (5年)</option>
+            <option value="72">72 期 (6年)</option>
+            <option value="84">84 期 (7年)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="paidTerms">目前已繳期數 <span class="hint-text">(若不知道可以填 0)</span></label>
+        <input type="number" id="paidTerms" value="0" placeholder="請輸入已繳納期數，不知道請維持 0">
+    </div>
+
+    <div class="form-group">
+        <label for="monthlyPayment">每期繳款金額 (元) <span class="hint-text" id="paymentHint"></span></label>
+        <input type="number" id="monthlyPayment" placeholder="若不知利率請務必填寫">
+    </div>
+
+    <button onclick="calculateLoan()">開始計算</button>
+
+    <div class="result-box" id="resultBox">
+        <div class="result-item" id="resEstRateRow" style="display:none;">
+            <span class="result-label">推估貸款年利率</span>
+            <span class="result-value" id="resEstRate">0%</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">每期應繳金額</span>
+            <span class="result-value" id="resMonthlyPayment">0 元</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label" id="remainLabel">目前本金餘額</span>
+            <span class="result-value" id="resRemainPrincipal">0 元</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">本金＋利息總額</span>
+            <span class="result-value" id="resTotalAmount">0 元</span>
+        </div>
+        
+        <div class="reference-note">※ 試算結果僅供參考，實際結清金額依各家融資公司合約為準</div>
+    </div>
+
+    <div class="contact-footer">
+        <div class="contact-text">汽車貸款問題與需求歡迎詢問</div>
+        <a href="https://www.instagram.com/lora_03050326/" target="_blank" class="ig-link">
+            <svg class="ig-icon" viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+            </svg>
+            lora_03050326
+        </a>
+    </div>
+</div>
+
+<script>
+    const rateSlider = document.getElementById('interestRate');
+    const rateDisplay = document.getElementById('rateDisplay');
+    const unknownRateChk = document.getElementById('unknownRate');
+    const rateInputArea = document.getElementById('rateInputArea');
+    const monthlyInput = document.getElementById('monthlyPayment');
+    const paymentHint = document.getElementById('paymentHint');
+
+    rateSlider.addEventListener('input', function() {
+        rateDisplay.innerText = this.value + '%';
+    });
+
+    unknownRateChk.addEventListener('change', function() {
+        if (this.checked) {
+            rateInputArea.classList.add('disabled-area');
+            paymentHint.innerText = "(必填：推估利率用)";
+            paymentHint.style.color = "var(--gold-primary)";
+            monthlyInput.style.borderColor = "var(--gold-primary)";
+        } else {
+            rateInputArea.classList.remove('disabled-area');
+            paymentHint.innerText = "";
+            monthlyInput.style.borderColor = "var(--border-color)";
+        }
+    });
+
+    function calculateLoan() {
+        const amount = parseFloat(document.getElementById('loanAmount').value);
+        const terms = parseInt(document.getElementById('loanTerms').value);
+        const paidTerms = parseInt(document.getElementById('paidTerms').value);
+        const manualPayment = parseFloat(document.getElementById('monthlyPayment').value);
+        const isUnknownRate = unknownRateChk.checked;
+        let annualRate = parseFloat(rateSlider.value);
+
+        if (isNaN(amount) || amount <= 0) return alert("【錯誤】請輸入正確的貸款金額！");
+        if (isNaN(paidTerms) || paidTerms < 0) return alert("【錯誤】請輸入正確的已繳期數（若不知道請填 0）！");
+        if (paidTerms > terms) return alert(`【錯誤】已繳期數（${paidTerms}）不能超過總期數（${terms}）！`);
+
+        let r = 0; 
+        let payment = 0; 
+
+        if (isUnknownRate) {
+            if (isNaN(manualPayment) || manualPayment <= 0) {
+                return alert("【錯誤】您勾選了不知道利率，請務必輸入「每期繳款金額」，系統才能為您推算！");
+            }
+            if (manualPayment * terms <= amount) {
+                return alert(`【數據異常】每期繳款 ${manualPayment} 元 × ${terms} 期 = 總繳 ${manualPayment * terms} 元。\n總繳款金額竟然小於或等於貸款本金（${amount} 元）！請檢查您的期數或繳款金額是否輸入錯誤。`);
+            }
+            
+            payment = manualPayment;
+            r = findMonthlyRate(amount, payment, terms);
+            annualRate = r * 12 * 100;
+            
+            document.getElementById('resEstRateRow').style.display = 'flex';
+            document.getElementById('resEstRate').innerText = annualRate.toFixed(2) + '%';
+        } else {
+            r = annualRate / 100 / 12;
+            payment = amount * (r * Math.pow(1 + r, terms)) / (Math.pow(1 + r, terms) - 1);
+            
+            document.getElementById('resEstRateRow').style.display = 'none';
+        }
+
+        const remainTerms = terms - paidTerms;
+        let remainingPrincipal = 0;
+        if (remainTerms > 0) {
+            remainingPrincipal = payment * (1 - Math.pow(1 + r, -remainTerms)) / r;
+        }
+
+        const totalAmount = payment * terms;
+
+        document.getElementById('remainLabel').innerText = `繳滿 ${paidTerms} 期後本金餘額`;
+        document.getElementById('resMonthlyPayment').innerText = Math.round(payment).toLocaleString() + ' 元';
+        document.getElementById('resRemainPrincipal').innerText = Math.round(remainingPrincipal).toLocaleString() + ' 元';
+        document.getElementById('resTotalAmount').innerText = Math.round(totalAmount).toLocaleString() + ' 元';
+        
+        document.getElementById('resultBox').style.display = 'block';
+        document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function findMonthlyRate(principal, payment, terms) {
+        let low = 0.0;
+        let high = 1.0; 
+        let mid = 0;
+        
+        for (let i = 0; i < 60; i++) {
+            mid = (low + high) / 2;
+            let estPayment = principal * (mid * Math.pow(1 + mid, terms)) / (Math.pow(1 + mid, terms) - 1);
+            if (estPayment > payment) {
+                high = mid;
+            } else {
+                low = mid;
+            }
+        }
+        return mid;
+    }
+</script>
+
+</body>
+</html>
